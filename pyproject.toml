@@ -21,6 +21,7 @@ classifiers = [
 
 dependencies = [
     "mcp[cli]>=1.21.0",
+    "smithery>=0.3.1",
 ]
 
 [project.urls]
@@ -29,5 +30,9 @@ Repository = "https://github.com/lv5railgun/cpp_guidelines"
 Issues = "https://github.com/lv5railgun/cpp_guidelines/issues"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["cpp_style"]
+py-modules = ["cpp_style_server"]

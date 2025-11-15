@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "cpp-style": {
-      "command": "uv",
-      "args": ["run", "mcp", "run", "cpp_style_server.py"],
-      "env": {}
-    }
-  }
-}
