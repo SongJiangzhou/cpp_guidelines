@@ -1,166 +1,155 @@
-# MCP Server Demo
+# C++ Style Guide MCP Server
 
-这是一个使用 FastMCP 框架构建的 MCP (Model Context Protocol) 服务器演示项目。
-
-## 快速开始
-
-### 1. 安装依赖
-
-```bash
-uv sync
-```
-
-### 2. 运行服务器
-
-**本地模式**:
-```bash
-uv run mcp run server.py
-```
-
-**网络模式** (供他人远程使用):
-```bash
-# 局域网访问
-uv run mcp run server.py --transport sse --host 0.0.0.0 --port 8000
-
-# 公网访问 (推荐使用 Cloudflare Tunnel)
-cloudflared tunnel --url http://localhost:8000
-```
-
-### 3. 连接到服务器
-
-**本地连接** (stdio 模式):
-```bash
-claude mcp add --transport stdio demo -- uv run mcp run server.py
-```
-
-**远程连接** (网络模式):
-```bash
-# 局域网
-claude mcp add --transport sse demo http://192.168.1.100:8000/sse
-
-# 公网 (Cloudflare Tunnel)
-claude mcp add --transport sse demo https://xxx.trycloudflare.com/sse
-```
-
-**验证连接**:
-```bash
-claude mcp list
-```
+专业的 C++ 编码规范检查和最佳实践建议工具，基于 MCP (Model Context Protocol) 协议构建。
 
 ## 功能特性
 
-这个 MCP 服务器提供了三种类型的组件示例：
+**5 个代码分析工具**
+- `check_naming` - 检查命名规范（变量、函数、类等）
+- `check_include_guard` - 验证头文件包含保护
+- `analyze_memory_safety` - 检测内存泄漏和悬空指针
+- `suggest_modern_cpp` - 现代 C++ 升级建议 (C++11/14/17/20/23)
+- `check_const_correctness` - 检查 const 正确性
 
-### 🔧 工具 (Tools)
-- **add**: 执行两个数字的加法运算
+**4 类规范文档资源**
+- `cpp-style://naming/{category}` - 命名规范
+- `cpp-style://best-practices/{topic}` - 最佳实践
+- `cpp-style://standard/{version}` - C++ 标准特性
+- `cpp-style://examples/{pattern}` - 设计模式示例
 
-### 📦 资源 (Resources)
-- **greeting://{name}**: 获取个性化问候语
+**2 个代码审查提示模板**
+- `code_review` - 综合/性能/安全/可读性审查
+- `refactor_suggestion` - 重构建议
 
-### 💬 提示 (Prompts)
-- **greet_user**: 生成不同风格的问候语（friendly、formal、casual）
+## 快速开始
+
+### 通过 Smithery 安装（推荐）
+
+```bash
+npx -y @smithery/cli install cpp-style-guide-mcp --client claude
+```
+
+### 本地安装
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/lv5railgun/cpp_guidelines.git
+cd cpp_guidelines
+
+# 2. 安装依赖
+uv sync
+
+# 3. 添加到 Claude Desktop 配置
+# 在 .mcp.json 或 Claude 配置文件中：
+{
+  "mcpServers": {
+    "cpp-style": {
+      "command": "uv",
+      "args": ["run", "mcp", "run", "cpp_style_server.py"],
+      "cwd": "/path/to/cpp_guidelines"
+    }
+  }
+}
+```
+
+## 使用示例
+
+```python
+# 检查命名规范
+请使用 check_naming 工具检查 "myVariable" 是否符合成员变量命名规范
+
+# 分析内存安全
+请分析以下代码的内存安全问题：
+void processData(int* ptr) {
+    delete ptr;
+    ptr->process();  // 悬空指针！
+}
+
+# 现代化建议
+请使用 suggest_modern_cpp 工具将代码升级到 C++17
+
+# 查看文档
+请获取资源 cpp-style://naming/all
+请获取资源 cpp-style://best-practices/memory
+```
+
+## 发布到 Smithery
+
+### 准备工作
+
+项目已包含所有必需的配置文件：
+- ✅ `smithery.yaml` - Smithery 部署配置
+- ✅ `Dockerfile` - 容器化配置
+- ✅ `pyproject.toml` - 项目元数据
+
+### 发布步骤
+
+```bash
+# 1. 提交代码
+git add .
+git commit -m "准备发布到 Smithery"
+git push origin main
+
+# 2. 访问 Smithery 发布页面
+# https://smithery.ai/new
+# 连接 GitHub 仓库，Smithery 会自动检测配置并部署
+
+# 3. 测试安装
+npx -y @smithery/cli install cpp-style-guide-mcp --client claude
+```
+
+### 验证清单
+
+- [ ] 本地测试通过: `uv run mcp run cpp_style_server.py`
+- [ ] GitHub 仓库已推送
+- [ ] Smithery 构建成功
+- [ ] 可以通过 Smithery CLI 安装
+- [ ] 工具调用正常
 
 ## 项目结构
 
 ```
-mcp-server-demo/
-├── server.py           # MCP 服务器主文件
-├── main.py            # 入口脚本
-├── .mcp.json          # MCP 配置文件（团队共享）
-├── pyproject.toml     # Python 项目配置
-├── CLAUDE.md          # Claude Code 使用指南
-└── MCP_USAGE.md       # .mcp.json 详细使用说明
+cpp_guidelines/
+├── cpp_style_server.py      # MCP 服务器主文件
+├── cpp_style/               # 核心功能模块
+│   ├── tools/              # 5个分析工具
+│   └── resources/          # 4类规范文档
+├── smithery.yaml           # Smithery 配置
+├── Dockerfile              # 容器配置
+└── pyproject.toml          # 项目元数据
 ```
-
-## 网络分享配置
-
-### 三种分享方式
-
-| 方式 | 适用场景 | 命令 |
-|------|----------|------|
-| **局域网** | 团队内网 | `--host 0.0.0.0 --port 8000` |
-| **Cloudflare Tunnel** | 公网访问(推荐) | `cloudflared tunnel --url http://localhost:8000` |
-| **SSH 隧道** | 临时测试 | `ssh -L 8000:localhost:8000 user@server` |
-
-### 安全建议
-
-**生产环境必须启用认证**:
-```bash
-export MCP_AUTH_TOKEN="your-secret-token"
-uv run mcp run server.py --transport sse --port 8000
-```
-
-客户端连接:
-```bash
-claude mcp add --transport sse demo http://server:8000/sse \
-  --header "Authorization: Bearer your-secret-token"
-```
-
-### 测试连接
-
-```bash
-# 测试服务器运行状态
-curl http://localhost:8000/health
-
-# 测试 SSE 端点
-curl -N http://localhost:8000/sse
-```
-
-## 文档
-
-- **[CLAUDE.md](CLAUDE.md)** - 项目架构和开发命令
-- **[MCP_USAGE.md](MCP_USAGE.md)** - .mcp.json 配置详细指南
-
-## 环境变量
-
-如果你的 MCP 服务器需要环境变量：
-
-1. 复制环境变量模板：
-   ```bash
-   cp .env.example .env
-   ```
-
-2. 编辑 `.env` 文件，填入实际值
-
-3. 在 `.mcp.json` 中使用 `${VAR_NAME}` 引用环境变量
-
-详见 [MCP_USAGE.md](MCP_USAGE.md) 了解更多配置选项。
 
 ## 开发
 
-### 添加新工具
+```bash
+# 运行服务器
+uv run mcp run cpp_style_server.py
 
-```python
+# 添加新工具
 @mcp.tool()
 def your_tool(param: str) -> str:
     """工具描述"""
     return "result"
-```
 
-### 添加新资源
-
-```python
-@mcp.resource("resource://{param}")
+# 添加新资源
+@mcp.resource("cpp-style://category/{param}")
 def your_resource(param: str) -> str:
-    """资源描述"""
-    return f"Resource content for {param}"
-```
-
-### 添加新提示
-
-```python
-@mcp.prompt()
-def your_prompt(param: str) -> str:
-    """提示描述"""
-    return f"Prompt template for {param}"
+    return "content"
 ```
 
 ## 技术栈
 
-- **Python**: >= 3.12
-- **FastMCP**: >= 1.21.0
-- **包管理器**: uv
+- Python >= 3.12
+- FastMCP >= 1.21.0
+- uv (包管理)
+- Docker (部署)
 
 ## 许可证
 
-MIT
+MIT License
+
+## 链接
+
+- GitHub: https://github.com/lv5railgun/cpp_guidelines
+- Issues: https://github.com/lv5railgun/cpp_guidelines/issues
+- Smithery: https://smithery.ai/
