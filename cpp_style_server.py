@@ -19,6 +19,10 @@ from cpp_style.resources.best_practices import get_resource as get_practices_res
 from cpp_style.resources.cpp_standards import get_resource as get_standards_resource
 from cpp_style.resources.design_patterns import get_resource as get_patterns_resource
 
+# 导入提示模块
+from cpp_style.prompts.code_review import get_prompt as get_code_review_prompt
+from cpp_style.prompts.refactor_suggestion import get_prompt as get_refactor_prompt
+
 # 创建 MCP 服务器实例
 mcp = FastMCP("C++ Style Guide Server")
 
@@ -243,78 +247,8 @@ def code_review(focus: str = "general") -> str:
               - readability: 可读性和维护性
               - modern: 现代 C++ 特性使用
     """
-    base_prompt = "请对以下 C++ 代码进行审查，关注以下方面：\n\n"
-
-    if focus == "performance":
-        base_prompt += """
-**性能审查重点:**
-1. 是否存在不必要的拷贝？应使用引用或移动语义吗？
-2. 容器使用是否合适？是否需要 reserve？
-3. 算法复杂度是否最优？
-4. 是否有内联优化机会？
-5. 循环是否可以优化？
-"""
-    elif focus == "safety":
-        base_prompt += """
-**安全性审查重点:**
-1. 是否有内存泄漏风险？
-2. 是否有悬空指针或野指针？
-3. 是否有数组越界风险？
-4. 异常安全性如何？是否符合 RAII？
-5. 是否使用了不安全的 C 风格函数？
-6. 类型转换是否安全？
-"""
-    elif focus == "readability":
-        base_prompt += """
-**可读性审查重点:**
-1. 命名是否清晰、符合规范？
-2. 代码结构是否清晰？
-3. 是否有足够的注释？
-4. 函数是否过长？是否需要拆分？
-5. 是否遵循单一职责原则？
-"""
-    elif focus == "modern":
-        base_prompt += """
-**现代 C++ 审查重点:**
-1. 是否使用了智能指针替代裸指针？
-2. 是否使用了 auto 类型推导？
-3. 是否使用了范围 for 循环？
-4. 是否使用了 constexpr 和 consteval？
-5. 是否使用了 std::optional 和 std::variant？
-6. 是否可以使用 Concepts 约束模板？
-"""
-    else:  # general
-        base_prompt += """
-**综合审查清单:**
-
-1. **正确性**
-   - 逻辑是否正确？
-   - 边界条件是否处理？
-   - 是否有潜在的 bug？
-
-2. **安全性**
-   - 内存管理是否安全？
-   - 是否有未定义行为？
-   - 异常处理是否完善？
-
-3. **性能**
-   - 是否有性能瓶颈？
-   - 数据结构选择是否合理？
-   - 是否有优化空间？
-
-4. **可维护性**
-   - 代码是否清晰易懂？
-   - 命名是否规范？
-   - 结构是否合理？
-
-5. **现代 C++**
-   - 是否充分利用现代 C++ 特性？
-   - 是否遵循最佳实践？
-"""
-
-    base_prompt += "\n请提供具体的改进建议和示例代码。"
-
-    return base_prompt
+    prompt_generator = get_code_review_prompt()
+    return prompt_generator.generate(focus)
 
 
 @mcp.prompt()
@@ -330,67 +264,8 @@ def refactor_suggestion(target_standard: str = "cpp17") -> str:
                         - cpp20: C++20
                         - cpp23: C++23
     """
-    standard_features = {
-        "cpp11": [
-            "auto 类型推导",
-            "nullptr",
-            "范围 for 循环",
-            "智能指针 (unique_ptr, shared_ptr)",
-            "lambda 表达式",
-            "右值引用和移动语义",
-        ],
-        "cpp14": [
-            "泛型 lambda",
-            "返回值类型推导",
-            "std::make_unique",
-            "二进制字面量",
-        ],
-        "cpp17": [
-            "结构化绑定",
-            "if/switch 初始化语句",
-            "constexpr if",
-            "std::optional",
-            "std::string_view",
-            "折叠表达式",
-        ],
-        "cpp20": [
-            "Concepts (概念)",
-            "Ranges (区间)",
-            "Coroutines (协程)",
-            "三路比较运算符 (<=>)",
-            "指定初始化器",
-            "std::span",
-        ],
-        "cpp23": [
-            "std::expected",
-            "std::print",
-            "if consteval",
-            "多维下标运算符",
-            "推导 this",
-        ],
-    }
-
-    prompt = f"请将以下 C++ 代码重构为使用 {target_standard.upper()} 标准。\n\n"
-    prompt += f"**可以使用的 {target_standard.upper()} 特性:**\n"
-
-    # 包含目标及之前的所有标准特性
-    standards = ["cpp11", "cpp14", "cpp17", "cpp20", "cpp23"]
-    target_index = standards.index(target_standard)
-
-    for std in standards[:target_index + 1]:
-        if std in standard_features:
-            prompt += f"\n{std.upper()} 特性:\n"
-            for feature in standard_features[std]:
-                prompt += f"  • {feature}\n"
-
-    prompt += "\n**重构要求:**\n"
-    prompt += "1. 使用现代 C++ 特性替代旧式写法\n"
-    prompt += "2. 提高代码可读性和安全性\n"
-    prompt += "3. 保持功能不变\n"
-    prompt += "4. 解释每个重构点的理由\n"
-    prompt += "5. 提供前后对比代码\n"
-
-    return prompt
+    prompt_generator = get_refactor_prompt()
+    return prompt_generator.generate(target_standard)
 
 
 # 启动服务器（仅在直接运行时）
